@@ -2,30 +2,25 @@
 using System.Collections;
 using System;
 
-public class Menu : State {
+public class Menu : State<MainController> {
 
-    public Menu(StateMachine state) : base(state)
+    public override void GlobalProcess()
     {
-
+        throw new NotImplementedException();
     }
 
-    public override void AfterUpdate()
+    public override void OnEnter()
     {
-        throw new NotImplementedException("Function used for Player");
+        throw new NotImplementedException();
     }
 
-    public override void EnterState()
+    public override void OnExit()
     {
-
+        throw new NotImplementedException();
     }
 
-    public override void LeaveState()
+    public override void Process()
     {
-        
-    }
-
-    public override void UpdateState()
-    {
-        
+        throw new NotImplementedException();
     }
 }

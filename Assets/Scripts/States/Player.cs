@@ -3,32 +3,27 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 
-public class Player : State
+public class Player : State<MainController>
 {
     #region Playing State
-    class Playing : State
+    class Playing : State<Player>
     {
-        public Playing(StateMachine state) : base(state)
-        {
-
-        }
-
-        public override void AfterUpdate()
-        {
-            throw new NotImplementedException("Function used for Player parent class");
-        }
-
-        public override void EnterState()
+        public override void GlobalProcess()
         {
             throw new NotImplementedException();
         }
 
-        public override void LeaveState()
+        public override void OnEnter()
         {
             throw new NotImplementedException();
         }
 
-        public override void UpdateState()
+        public override void OnExit()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void Process()
         {
             throw new NotImplementedException();
         }
@@ -38,89 +33,102 @@ public class Player : State
     #region Paused State
     class Paused : State<Player>
     {
-        public Paused(StateMachine state) : base(state)
-        {
-
-        }
-
-        public override void AfterUpdate()
+        public override void GlobalProcess()
         {
             throw new NotImplementedException();
         }
 
-        public override void EnterState()
+        public override void OnEnter()
         {
             throw new NotImplementedException();
         }
 
-        public override void LeaveState()
+        public override void OnExit()
         {
             throw new NotImplementedException();
         }
 
-        public override void UpdateState()
+        public override void Process()
         {
-            if(owner.tryToPlay)
-            {
-                
-            }
+            throw new NotImplementedException();
         }
     }
     #endregion
 
     #region Stopped State
-    class Stopped : State
+    class Stopped : State<Player>
     {
-        public Stopped(StateMachine state) : base(state)
-        {
-
-        }
-
-        public override void AfterUpdate()
+        public override void GlobalProcess()
         {
             throw new NotImplementedException();
         }
 
-        public override void EnterState()
+        public override void OnEnter()
         {
             throw new NotImplementedException();
         }
 
-        public override void LeaveState()
+        public override void OnExit()
         {
             throw new NotImplementedException();
         }
 
-        public override void UpdateState()
+        public override void Process()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Play(params object[] args)
+        {
+
+        }
+    }
+    #endregion
+
+    #region Skipping State
+    class Skipping : State<Player>
+    {
+        public override void GlobalProcess()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void OnEnter()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void OnExit()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void Process()
         {
             throw new NotImplementedException();
         }
     }
     #endregion
 
-    #region Skipping State
-    class Skipping : State
+    #region Back State
+    class Back : State<Player>
     {
-        public Skipping(StateMachine state) : base(state)
-        {
-        }
-
-        public override void AfterUpdate()
+        public override void GlobalProcess()
         {
             throw new NotImplementedException();
         }
 
-        public override void EnterState()
+        public override void OnEnter()
         {
             throw new NotImplementedException();
         }
 
-        public override void LeaveState()
+        public override void OnExit()
         {
             throw new NotImplementedException();
         }
 
-        public override void UpdateState()
+        public override void Process()
         {
             throw new NotImplementedException();
         }
@@ -136,58 +144,16 @@ public class Player : State
     float timeRemaining;
     internal bool tryToPlay = false;
 
-    public Player(StateMachine state) : base(state)
+    private State<Player>[] playerStates = new State<Player>[]
     {
+        new Playing(),
+        new Paused(),
+        new Stopped(),
+        new Skipping(),
+        new Back()
+    };
 
-    }
-
-    public override void EnterState()
-    {
-        
-    }
-
-    public override void LeaveState()
-    {
-        
-    }
-
-    public override void UpdateState()
-    {
-
-    }
-
-    public override void AfterUpdate()
-    {
-        if (!audioSource.isPlaying)
-        {
-            if (!newClip)
-            {
-                audioSource.clip = null;
-            }
-            if (audioSource.clip == null)
-            {
-                if (songPlayList.Count > 0)
-                {
-                    AudioClip clip = songPlayList[trackInList] as AudioClip;
-                    if (clip == null)
-                    {
-                        WWW song = new WWW((string)songPlayList[trackInList]);
-                        songPlayList[trackInList] = song.audioClip;
-                    }
-                    if (clip != null)
-                    {
-                        audioSource.clip = clip;
-                        newClip = true;
-                    }
-                }
-            }
-            if (audioSource.clip != null && audioSource.clip.loadState == AudioDataLoadState.Loaded && (newClip || looping))
-            {
-                audioSource.Play();
-                newClip = false;
-            }
-        }
-    }
+    private StateMachine<Player> stateMachine = new StateMachine<Player>();
 
     public void Play(params object[] args)
     {
@@ -234,4 +200,60 @@ public class Player : State
             audioSource.clip = lastPlayed;
         }
     }
+
+    #region Override Methods
+    public override void Configure(MainController owner)
+    {
+        base.Configure(owner);
+        stateMachine.ChangeState(playerStates[2]);
+    }
+
+    public override void OnEnter()
+    {
+        throw new NotImplementedException();
+    }
+
+    public override void Process()
+    {
+        stateMachine.Update();
+    }
+
+    public override void OnExit()
+    {
+        throw new NotImplementedException();
+    }
+
+    public override void GlobalProcess()
+    {
+        if (!audioSource.isPlaying)
+        {
+            if (!newClip)
+            {
+                audioSource.clip = null;
+            }
+            if (audioSource.clip == null)
+            {
+                if (songPlayList.Count > 0)
+                {
+                    AudioClip clip = songPlayList[trackInList] as AudioClip;
+                    if (clip == null)
+                    {
+                        WWW song = new WWW((string)songPlayList[trackInList]);
+                        songPlayList[trackInList] = song.audioClip;
+                    }
+                    if (clip != null)
+                    {
+                        audioSource.clip = clip;
+                        newClip = true;
+                    }
+                }
+            }
+            if (audioSource.clip != null && audioSource.clip.loadState == AudioDataLoadState.Loaded && (newClip || looping))
+            {
+                audioSource.Play();
+                newClip = false;
+            }
+        }
+    }
+    #endregion
 }
