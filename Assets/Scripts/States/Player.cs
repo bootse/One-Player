@@ -135,7 +135,16 @@ public class Player : State<MainController>
     }
     #endregion
 
-    public AudioSource audioSource;
+    private AudioSource audioPlayer;
+    /// <summary>
+    /// Variable used as the music player
+    /// </summary>
+    public AudioSource AudioPlayer
+    {
+        get { return audioPlayer; }
+        private set { audioPlayer = value; }
+    }
+
     List<object> songPlayList = new List<object>();
     int trackInList = 0;
     bool looping = false;
@@ -166,7 +175,7 @@ public class Player : State<MainController>
         {
             songPlayList.Add(args[0]);
         }
-        if(!audioSource.isPlaying)
+        if(!AudioPlayer.isPlaying)
         {
             tryToPlay = true;
         }
@@ -184,20 +193,20 @@ public class Player : State<MainController>
                 WWW songFile = new WWW(songUrl);
                 song = songFile.audioClip;
             }
-            audioSource.clip = song;
+            AudioPlayer.clip = song;
         }
     }
 
     public void Previous(params object[] args)
     {
-        Debug.Log(audioSource.time);
-        if(audioSource.time > 5)
+        Debug.Log(AudioPlayer.time);
+        if(AudioPlayer.time > 5)
         {
-            audioSource.Play();
+            AudioPlayer.Play();
         }
         else
         {
-            audioSource.clip = lastPlayed;
+            AudioPlayer.clip = lastPlayed;
         }
     }
 
@@ -206,32 +215,34 @@ public class Player : State<MainController>
     {
         base.Configure(owner);
         stateMachine.ChangeState(playerStates[2]);
+        AudioPlayer = owner.GetComponent<AudioSource>();
     }
 
     public override void OnEnter()
     {
-        throw new NotImplementedException();
+        
     }
 
     public override void Process()
     {
-        stateMachine.Update();
+        
     }
 
     public override void OnExit()
     {
-        throw new NotImplementedException();
+        
     }
 
     public override void GlobalProcess()
     {
-        if (!audioSource.isPlaying)
+        stateMachine.Update();
+        if (!AudioPlayer.isPlaying)
         {
             if (!newClip)
             {
-                audioSource.clip = null;
+                AudioPlayer.clip = null;
             }
-            if (audioSource.clip == null)
+            if (AudioPlayer.clip == null)
             {
                 if (songPlayList.Count > 0)
                 {
@@ -243,14 +254,14 @@ public class Player : State<MainController>
                     }
                     if (clip != null)
                     {
-                        audioSource.clip = clip;
+                        AudioPlayer.clip = clip;
                         newClip = true;
                     }
                 }
             }
-            if (audioSource.clip != null && audioSource.clip.loadState == AudioDataLoadState.Loaded && (newClip || looping))
+            if (AudioPlayer.clip != null && AudioPlayer.clip.loadState == AudioDataLoadState.Loaded && (newClip || looping))
             {
-                audioSource.Play();
+                AudioPlayer.Play();
                 newClip = false;
             }
         }
